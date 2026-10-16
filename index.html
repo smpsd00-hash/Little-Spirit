@@ -304,23 +304,65 @@
               <span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">4</span>
               現在的你，最需要什麼樣的陪伴或行動？
             </label>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
                 <input type="checkbox" name="needOption" value="安靜獨處一下" class="accent-brand-500 rounded">
                 <span>🤫 安靜獨處一下</span>
               </label>
-              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
                 <input type="checkbox" name="needOption" value="找人抱抱或聊聊" class="accent-brand-500 rounded">
                 <span>🫂 找人抱抱或聊聊</span>
               </label>
-              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
-                <input type="checkbox" name="needOption" value="喝水或吃點點心" class="accent-brand-500 rounded">
-                <span>🥤 喝水或吃點小點心</span>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="喝水或吃點小點心" class="accent-brand-500 rounded">
+                <span>🥤 喝水或吃點點心</span>
               </label>
-              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
                 <input type="checkbox" name="needOption" value="深呼吸動動身體" class="accent-brand-500 rounded">
                 <span>🏃 深呼吸動動身體</span>
               </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="聽喜歡的音樂" class="accent-brand-500 rounded">
+                <span>🎵 聽聽喜歡的音樂</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="躺著閉上眼休息" class="accent-brand-500 rounded">
+                <span>🛌 躺著閉上眼休息</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="在紙上塗鴉寫字" class="accent-brand-500 rounded">
+                <span>🎨 在紙上塗鴉畫畫</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="到戶外吹風散步" class="accent-brand-500 rounded">
+                <span>🍃 到戶外吹風散步</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="玩心愛的玩具或寵物" class="accent-brand-500 rounded">
+                <span>🐶 摸摸寵物或玩偶</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="洗個溫暖熱水澡" class="accent-brand-500 rounded">
+                <span>🛁 洗個舒服熱水澡</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" name="needOption" value="讀一本喜歡的書" class="accent-brand-500 rounded">
+                <span>📖 翻翻喜歡的故事書</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm transition">
+                <input type="checkbox" id="need-other-checkbox" onchange="toggleOtherNeedInput(this.checked)" class="accent-brand-500 rounded">
+                <span>✏️ 其他想法...</span>
+              </label>
+            </div>
+
+            <!-- 其他選項自訂輸入框 (勾選後展開) -->
+            <div id="other-need-container" class="mt-3 hidden">
+              <div class="flex items-center space-x-2 bg-rose-50/70 p-3 rounded-2xl border border-rose-200 animate-in fade-in duration-200">
+                <i data-lucide="edit-3" class="w-4 h-4 text-brand-600 shrink-0"></i>
+                <input type="text" id="need-other-input" 
+                  class="w-full bg-white px-3 py-2 text-sm rounded-xl border border-rose-200 focus:outline-none focus:ring-2 focus:ring-brand-400 placeholder-stone-400 text-stone-700" 
+                  placeholder="寫下你現在最想做、或最需要的事情（例如：想吃一顆巧克力、想去操場跑兩圈...）">
+              </div>
             </div>
           </div>
 
@@ -965,6 +1007,18 @@
         checkedNeeds.push(cb.value);
       });
 
+      // 檢查是否有填寫「其他」選項
+      const otherCheckbox = document.getElementById('need-other-checkbox');
+      const otherInput = document.getElementById('need-other-input');
+      if (otherCheckbox && otherCheckbox.checked) {
+        const customText = otherInput ? otherInput.value.trim() : '';
+        if (customText) {
+          checkedNeeds.push(`✏️ ${customText}`);
+        } else {
+          checkedNeeds.push('✏️ 自己的特別想法');
+        }
+      }
+
       // 產生日期
       const now = new Date();
       const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1007,7 +1061,7 @@
         needsWrapper.classList.remove('hidden');
         checkedNeeds.forEach(need => {
           const nSpan = document.createElement('span');
-          nSpan.className = "px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg border border-stone-200";
+          nSpan.className = "px-2.5 py-1 bg-rose-50 text-brand-700 rounded-lg border border-rose-200 font-bold";
           nSpan.textContent = need;
           needsList.appendChild(nSpan);
         });
@@ -1028,6 +1082,19 @@
       showToast('🎉 心情卡片生成成功！');
     }
 
+    // 控制「其他」輸入欄位的顯示與隱藏
+    function toggleOtherNeedInput(checked) {
+      const container = document.getElementById('other-need-container');
+      const input = document.getElementById('need-other-input');
+      if (checked) {
+        container.classList.remove('hidden');
+        if (input) input.focus();
+      } else {
+        container.classList.add('hidden');
+        if (input) input.value = '';
+      }
+    }
+
     // 重設表單
     function resetForm() {
       selectedExpressEmotions.clear();
@@ -1036,6 +1103,14 @@
       updateIntensityDisplay(5);
       document.getElementById('mood-text').value = '';
       document.querySelectorAll('input[name="needOption"]').forEach(cb => cb.checked = false);
+      
+      const otherCb = document.getElementById('need-other-checkbox');
+      if (otherCb) otherCb.checked = false;
+      const otherInput = document.getElementById('need-other-input');
+      if (otherInput) otherInput.value = '';
+      const otherContainer = document.getElementById('other-need-container');
+      if (otherContainer) otherContainer.classList.add('hidden');
+
       document.getElementById('result-card-section').classList.add('hidden');
       showToast('已重設表單內容');
     }
