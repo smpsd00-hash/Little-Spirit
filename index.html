@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>認識我的情緒 - 心情小工具</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Zen Maru Gothic & Nunito for friendly warmth -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#e15b6d', // 主視覺溫暖玫瑰粉紅 (對照圖片按鈕色彩)
+              600: '#d9475c',
+              700: '#be2e45',
+              800: '#9d283c',
+              900: '#842637',
+            },
+            softBg: '#FDFBF7',
+            cardBg: '#FFFFFF',
+          },
+          fontFamily: {
+            sans: ['"Zen Maru Gothic"', 'Nunito', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 8px 30px rgba(225, 91, 109, 0.08)',
+            'card': '0 4px 20px rgba(0, 0, 0, 0.05)',
+            'float': '0 12px 32px rgba(225, 91, 109, 0.16)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FDF9F6;
+      background-image: radial-gradient(#F8E2E5 1.5px, transparent 1.5px), radial-gradient(#E8EDF9 1.5px, #FDF9F6 1.5px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      font-family: 'Zen Maru Gothic', 'Nunito', sans-serif;
+    }
+
+    /* Bounce on hover */
+    .bounce-hover:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+    
+    /* Breathing animation for calm corner */
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.85); opacity: 0.6; }
+      50% { transform: scale(1.18); opacity: 1; }
+    }
+    .animate-breathe {
+      animation: breathe 7s ease-in-out infinite;
+    }
+
+    /* Custom range styling */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #e15b6d;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(225,91,109,0.5);
+      border: 3px solid #ffffff;
+    }
+
+    .modal-backdrop {
+      background-color: rgba(60, 40, 45, 0.45);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="text-stone-700 min-h-screen flex flex-col justify-between selection:bg-brand-200">
+
+  <!-- 頂部導航 -->
+  <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-rose-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('explore')">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-rose-300 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+          <i data-lucide="smile" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-xs tracking-wider font-bold text-brand-600 bg-rose-50 px-2 py-0.5 rounded-full inline-block">心靈小導師 02</span>
+          <h1 class="text-lg font-black text-stone-800 tracking-wide">認識我的情緒 · 情緒小工具</h1>
+        </div>
+      </div>
+
+      <!-- 功能切換按鍵 -->
+      <nav class="flex items-center space-x-2 bg-rose-50/80 p-1 rounded-2xl border border-rose-200/60">
+        <button id="nav-btn-explore" onclick="switchTab('explore')" 
+          class="px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 bg-white text-brand-600 shadow-sm">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>情緒圖卡庫</span>
+        </button>
+        <button id="nav-btn-express" onclick="switchTab('express')" 
+          class="px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 text-stone-600 hover:text-brand-600">
+          <i data-lucide="message-circle-heart" class="w-4 h-4"></i>
+          <span>說說我的心情</span>
+        </button>
+        <button id="nav-btn-breathe" onclick="switchTab('breathe')" 
+          class="px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 text-stone-600 hover:text-brand-600 hidden sm:flex">
+          <i data-lucide="wind" class="w-4 h-4"></i>
+          <span>放鬆角落</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主內容區 -->
+  <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+
+    <!-- 橫幅區域 (依據提供的圖片風格打造的溫馨指引) -->
+    <div class="bg-gradient-to-r from-rose-50/90 via-pink-50/70 to-amber-50/60 rounded-3xl p-5 md:p-7 border-2 border-rose-100/90 shadow-soft mb-8 relative overflow-hidden">
+      <!-- 裝飾小背景 -->
+      <div class="absolute -right-8 -bottom-8 w-44 h-44 bg-rose-200/30 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -left-6 -top-6 w-32 h-32 bg-amber-200/30 rounded-full blur-xl pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row items-center gap-6 relative z-10">
+        
+        <!-- 左側主標語區 -->
+        <div class="flex-1 space-y-3">
+          <div class="inline-flex items-center space-x-2">
+            <span class="w-8 h-8 rounded-full bg-brand-500 text-white font-black text-sm flex items-center justify-center shadow">02</span>
+            <span class="text-2xl md:text-3xl font-black text-brand-600 tracking-tight">認識我的情緒</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-bold text-stone-800 flex items-center gap-2">
+            我的心情，正在告訴我什麼？
+            <span class="text-lg">💭</span>
+          </h2>
+          <p class="text-stone-600 text-sm md:text-base leading-relaxed">
+            <strong class="text-amber-700">開心</strong>、<strong class="text-sky-700">難過</strong>、<strong class="text-rose-700">生氣</strong>、<strong class="text-violet-700">緊張</strong>和<strong class="text-purple-700">害怕</strong>，都是我們每天可能經歷的自然情緒。<br class="hidden sm:inline">
+            請記得：<span class="bg-amber-100/80 px-2 py-0.5 rounded-lg text-amber-900 font-bold">情緒沒有好與壞</span>，每一種心情都正在像送信的小精靈一樣，提醒我們重要的事情！
+          </p>
+        </div>
+
+        <!-- 右側快速行動卡 -->
+        <div class="w-full lg:w-80 bg-white/90 rounded-2xl p-4 md:p-5 border border-rose-200 shadow-card flex flex-col justify-between">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- 4格情緒小圖預覽 -->
+            <div class="grid grid-cols-2 gap-1.5 w-14 h-14 p-1.5 bg-rose-50 rounded-xl border border-rose-100 shrink-0">
+              <div class="bg-amber-300 rounded flex items-center justify-center text-xs">😄</div>
+              <div class="bg-sky-300 rounded flex items-center justify-center text-xs">😢</div>
+              <div class="bg-rose-400 rounded flex items-center justify-center text-xs">😡</div>
+              <div class="bg-purple-300 rounded flex items-center justify-center text-xs">😨</div>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-brand-500 uppercase tracking-wider">今日心情快篩</span>
+              <h4 class="font-black text-stone-800 text-base">你現在感覺如何？</h4>
+              <p class="text-xs text-stone-500">點選圖卡，花一分鐘傾聽自己</p>
+            </div>
+          </div>
+          <button onclick="switchTab('express')" class="w-full py-2.5 px-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md shadow-brand-500/25 flex items-center justify-center space-x-2 transition-all transform active:scale-95">
+            <span>開始說說心情</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 頁面 1：情緒圖卡庫 (EXPLORE TAB) -->
+    <section id="tab-explore" class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-xl font-bold text-stone-800 flex items-center gap-2">
+            <span>✨</span> 認識 8 款常見的情緒小精靈
+          </h3>
+          <p class="text-sm text-stone-500">點擊任意圖卡，看看當這個情緒出現時，身體會有什麼感覺，以及如何陪伴它！</p>
+        </div>
+
+        <!-- 篩選標籤 -->
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="filterCategory('all')" class="category-btn active px-3 py-1 text-xs font-bold rounded-full bg-stone-800 text-white" data-cat="all">全部</button>
+          <button onclick="filterCategory('high-energy')" class="category-btn px-3 py-1 text-xs font-bold rounded-full bg-white text-stone-600 hover:bg-stone-100 border border-stone-200" data-cat="high-energy">活力與衝擊</button>
+          <button onclick="filterCategory('low-energy')" class="category-btn px-3 py-1 text-xs font-bold rounded-full bg-white text-stone-600 hover:bg-stone-100 border border-stone-200" data-cat="low-energy">低落與需要陪伴</button>
+          <button onclick="filterCategory('calm')" class="category-btn px-3 py-1 text-xs font-bold rounded-full bg-white text-stone-600 hover:bg-stone-100 border border-stone-200" data-cat="calm">平靜放鬆</button>
+        </div>
+      </div>
+
+      <!-- 圖卡網格容器 -->
+      <div id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        <!-- 由 JavaScript 動態生成所有圖卡 -->
+      </div>
+    </section>
+
+    <!-- 頁面 2：說說我的心情 (EXPRESS TAB) -->
+    <section id="tab-express" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 md:p-8 border-2 border-rose-100 shadow-soft">
+        
+        <!-- 步驟指示 -->
+        <div class="flex items-center justify-between border-b border-stone-100 pb-5 mb-6">
+          <div>
+            <h3 class="text-2xl font-black text-stone-800 flex items-center gap-2">
+              <i data-lucide="heart-handshake" class="w-7 h-7 text-brand-500"></i>
+              我的心情秘密日記
+            </h3>
+            <p class="text-sm text-stone-500 mt-1">給自己幾分鐘時間，把心裡的小聲音安心說出來吧！</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-brand-600 font-bold bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100 inline-flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              安全守護空間
+            </span>
+          </div>
+        </div>
+
+        <form id="express-form" onsubmit="event.preventDefault(); generateMoodCard();" class="space-y-8">
+          
+          <!-- 步驟一：選擇圖卡 -->
+          <div>
+            <label class="block text-base font-bold text-stone-800 mb-2 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">1</span>
+              選出最符合你現在心情的情緒圖卡（可複選 1~3 種）：
+            </label>
+            <p class="text-xs text-stone-500 mb-3">人有時候會同時有兩種情緒喔！例如「既期待又緊張」，這都是非常正常的。</p>
+            
+            <div id="express-selection-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-3">
+              <!-- 由 JS 渲染可選的按鈕 -->
+            </div>
+            <div id="selection-hint" class="text-xs text-brand-600 font-medium mt-2 hidden">
+              請至少挑選一種情緒圖卡喔！
+            </div>
+          </div>
+
+          <!-- 步驟二：心情強度溫度計 -->
+          <div class="bg-rose-50/50 p-5 rounded-2xl border border-rose-100/80">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-base font-bold text-stone-800 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">2</span>
+                測量這個情緒的「強烈度」：
+              </label>
+              <div class="flex items-center space-x-1.5 bg-white px-3 py-1 rounded-full border border-rose-200">
+                <span id="intensity-emoji" class="text-lg">🌤️</span>
+                <span id="intensity-value-display" class="font-black text-brand-600 text-sm">5 / 10 級</span>
+              </div>
+            </div>
+            
+            <input type="range" id="mood-intensity" min="1" max="10" value="5" 
+              class="w-full h-3 bg-stone-200 rounded-lg appearance-none cursor-pointer mt-2"
+              oninput="updateIntensityDisplay(this.value)">
+
+            <div class="flex justify-between text-xs text-stone-500 font-bold mt-2 px-1">
+              <span>🌱 1 淡淡的一點點</span>
+              <span>🌤️ 5 還滿明顯的</span>
+              <span>🔥 10 超級強烈爆炸滿分</span>
+            </div>
+          </div>
+
+          <!-- 步驟三：引導式說出心情 (可使用提示句或自由寫作) -->
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <label class="text-base font-bold text-stone-800 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">3</span>
+                說說看：發生了什麼事？你的身體有什麼感覺？
+              </label>
+              
+              <!-- 快速幫忙造句範本選單 -->
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-stone-400">不知道怎麼開頭？試試：</span>
+                <button type="button" onclick="insertTemplate(1)" class="text-xs font-bold text-brand-600 hover:bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">學校生活</button>
+                <button type="button" onclick="insertTemplate(2)" class="text-xs font-bold text-brand-600 hover:bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">朋友互動</button>
+                <button type="button" onclick="insertTemplate(3)" class="text-xs font-bold text-brand-600 hover:bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">我需要放鬆</button>
+              </div>
+            </div>
+
+            <!-- 文字輸入框與語音輸入按鈕 -->
+            <div class="relative">
+              <textarea id="mood-text" rows="4" 
+                class="w-full p-4 rounded-2xl border-2 border-stone-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none text-stone-700 placeholder-stone-400 resize-none transition"
+                placeholder="例如：我現在覺得有點緊張，因為下午要上台報告。我的肚子熱熱的、心跳很快。我希望自己能順利講完..."></textarea>
+              
+              <!-- 語音辨識按鍵 (若瀏覽器支援) -->
+              <div class="absolute right-3 bottom-3 flex items-center space-x-1.5">
+                <button type="button" id="speech-btn" onclick="toggleSpeechRecognition()" 
+                  class="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-bold flex items-center gap-1 transition"
+                  title="用語音說心情">
+                  <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                  <span id="speech-btn-label">語音輸入</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 步驟四：我現在需要什麼？（自我照顧清單） -->
+          <div>
+            <label class="block text-base font-bold text-stone-800 mb-2 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-black flex items-center justify-center">4</span>
+              現在的你，最需要什麼樣的陪伴或行動？
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+                <input type="checkbox" name="needOption" value="安靜獨處一下" class="accent-brand-500 rounded">
+                <span>🤫 安靜獨處一下</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+                <input type="checkbox" name="needOption" value="找人抱抱或聊聊" class="accent-brand-500 rounded">
+                <span>🫂 找人抱抱或聊聊</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+                <input type="checkbox" name="needOption" value="喝水或吃點點心" class="accent-brand-500 rounded">
+                <span>🥤 喝水或吃點小點心</span>
+              </label>
+              <label class="flex items-center space-x-2 p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl border border-stone-200 cursor-pointer text-sm">
+                <input type="checkbox" name="needOption" value="深呼吸動動身體" class="accent-brand-500 rounded">
+                <span>🏃 深呼吸動動身體</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 送出產生卡片按鈕 -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center gap-3 justify-center">
+            <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-black text-base rounded-2xl shadow-lg shadow-brand-500/30 flex items-center justify-center space-x-2 transition transform active:scale-95">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <span>生成我的心情卡片</span>
+            </button>
+            <button type="button" onclick="resetForm()" class="w-full sm:w-auto px-5 py-3.5 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold text-sm rounded-2xl transition">
+              重新填寫
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- 心情卡片展示結果區域 (預設隱藏，生成後顯示) -->
+      <div id="result-card-section" class="hidden">
+        <div class="bg-gradient-to-b from-rose-50 to-white border-2 border-brand-200 rounded-3xl p-6 md:p-8 shadow-float">
+          
+          <div class="flex items-center justify-between mb-6 pb-3 border-b border-rose-100">
+            <div class="flex items-center space-x-2">
+              <span class="text-2xl">💌</span>
+              <h4 class="text-xl font-black text-stone-800">這是你的專屬心情卡片</h4>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="readMoodAloud()" class="p-2 text-stone-600 hover:text-brand-600 hover:bg-white rounded-xl transition border border-stone-200" title="朗讀心情卡">
+                <i data-lucide="volume-2" class="w-5 h-5"></i>
+              </button>
+              <button onclick="copyMoodText()" class="p-2 text-stone-600 hover:text-brand-600 hover:bg-white rounded-xl transition border border-stone-200" title="複製文字">
+                <i data-lucide="copy" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 卡片本體 (美觀可列印/截圖) -->
+          <div id="printable-mood-card" class="bg-white rounded-2xl p-6 border border-rose-200 shadow-sm space-y-4">
+            
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3">
+              <div class="flex items-center space-x-2">
+                <span class="text-xs bg-brand-100 text-brand-700 font-bold px-2.5 py-1 rounded-full" id="card-date-time">2026/10/16</span>
+                <span class="text-xs text-stone-400 font-semibold">自我覺察時間</span>
+              </div>
+              <div id="card-intensity-badge" class="text-xs font-bold px-3 py-1 bg-amber-100 text-amber-800 rounded-full">
+                強度：5 級
+              </div>
+            </div>
+
+            <!-- 情緒小精靈徽章列 -->
+            <div>
+              <span class="text-xs font-bold text-stone-400 block mb-2">我辨識出的情緒：</span>
+              <div id="card-emotions-list" class="flex flex-wrap gap-2">
+                <!-- 動態注入標籤 -->
+              </div>
+            </div>
+
+            <!-- 學生寫下的感受內容 -->
+            <div class="bg-rose-50/40 rounded-xl p-4 border border-rose-100">
+              <span class="text-xs font-bold text-stone-400 block mb-1">我的心情獨白：</span>
+              <p id="card-narrative-text" class="text-stone-700 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
+                今天過得還不錯，心情很放鬆。
+              </p>
+            </div>
+
+            <!-- 自我照顧清單 -->
+            <div id="card-needs-wrapper">
+              <span class="text-xs font-bold text-stone-400 block mb-1">我為自己選擇的照顧行動：</span>
+              <div id="card-needs-list" class="flex flex-wrap gap-1.5 text-xs text-stone-700 font-bold">
+                <!-- 動態注入 -->
+              </div>
+            </div>
+
+            <!-- 溫暖打氣小提醒 (自動根據情緒推薦) -->
+            <div class="bg-gradient-to-r from-amber-50 to-rose-50 p-4 rounded-xl border border-amber-200/80 flex items-start space-x-3">
+              <span class="text-2xl shrink-0">🌱</span>
+              <div>
+                <h5 class="text-xs font-bold text-amber-800 uppercase tracking-wider">小導師的溫暖叮嚀</h5>
+                <p id="card-support-message" class="text-xs md:text-sm text-stone-700 mt-0.5 leading-relaxed">
+                  謝謝你願意誠實看見自己的情緒。你所感受的每件事都很珍貴，記得給自己一個小擁抱喔！
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 卡片下方行動按鍵 -->
+          <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+            <span class="text-xs text-stone-400">💡 你可以截圖保存這張小卡，或是與老師、家長或好友分享你的心情喔！</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="switchTab('breathe')" class="px-4 py-2 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition">
+                <i data-lucide="wind" class="w-4 h-4"></i>
+                <span>到放鬆角落調適心情</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁面 3：放鬆角落 (BREATHE TAB) -->
+    <section id="tab-breathe" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 md:p-10 border-2 border-sky-100 shadow-soft text-center max-w-2xl mx-auto">
+        <span class="text-xs font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+          舒緩身心 · 4-4-4 調息練習
+        </span>
+        <h3 class="text-2xl md:text-3xl font-black text-stone-800 mt-2 mb-2">深呼吸，找回平靜力量</h3>
+        <p class="text-stone-500 text-sm max-w-md mx-auto mb-8">
+          無論是緊張、生氣或難過，慢慢地深呼吸能告訴身體的大腦：「我現在很安全，可以放鬆了。」
+        </p>
+
+        <!-- 呼吸視覺引導球 -->
+        <div class="relative w-64 h-64 mx-auto flex items-center justify-center my-6">
+          <!-- 外光暈 -->
+          <div id="breathe-circle-outer" class="absolute inset-0 rounded-full bg-sky-100/70 scale-90 transition-all duration-1000 ease-in-out"></div>
+          <!-- 中光環 -->
+          <div id="breathe-circle-mid" class="absolute w-48 h-48 rounded-full bg-teal-100/80 scale-95 transition-all duration-1000 ease-in-out"></div>
+          <!-- 核心球 -->
+          <div id="breathe-circle-core" class="relative z-10 w-36 h-36 rounded-full bg-gradient-to-tr from-sky-400 to-teal-300 shadow-lg shadow-sky-500/25 flex flex-col items-center justify-center text-white transition-all duration-1000 ease-in-out transform">
+            <i data-lucide="sparkle" class="w-6 h-6 mb-1 animate-pulse"></i>
+            <span id="breathe-status-text" class="text-base font-black tracking-wider">點擊開始</span>
+            <span id="breathe-timer" class="text-xs opacity-90 font-bold">4秒</span>
+          </div>
+        </div>
+
+        <!-- 呼吸控制按鈕 -->
+        <div class="flex items-center justify-center space-x-3 mt-6">
+          <button id="breathe-toggle-btn" onclick="toggleBreathingGuide()" 
+            class="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl shadow-md shadow-sky-500/20 flex items-center space-x-2 transition">
+            <i data-lucide="play" class="w-4 h-4"></i>
+            <span>開始呼吸循環</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-stone-100 text-left">
+          <div class="p-3 bg-stone-50 rounded-xl text-center">
+            <span class="text-base font-black text-sky-600 block">1. 吸氣 4秒</span>
+            <span class="text-xs text-stone-500">鼻子慢慢吸入新鮮空氣</span>
+          </div>
+          <div class="p-3 bg-stone-50 rounded-xl text-center">
+            <span class="text-base font-black text-teal-600 block">2. 屏息 4秒</span>
+            <span class="text-xs text-stone-500">感覺空氣停留在胸口腹部</span>
+          </div>
+          <div class="p-3 bg-stone-50 rounded-xl text-center">
+            <span class="text-base font-black text-rose-500 block">3. 吐氣 4秒</span>
+            <span class="text-xs text-stone-500">像吹蒲公英一樣緩緩吐氣</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 圖卡詳細認識視窗 (Modal) -->
+  <div id="card-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border-2 border-rose-100 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- 頂部色塊與圖示 -->
+      <div id="modal-header-bg" class="p-6 text-white text-center relative">
+        <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/15 hover:bg-black/30 text-white flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <div id="modal-avatar" class="w-20 h-20 mx-auto rounded-2xl bg-white/30 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center text-4xl shadow-md mb-2">
+          😊
+        </div>
+        <h3 id="modal-title" class="text-2xl font-black">開心 (Happy)</h3>
+        <span id="modal-subtitle" class="text-xs font-semibold opacity-90 inline-block bg-white/20 px-3 py-0.5 rounded-full mt-1">
+          高能量 · 舒服的情緒
+        </span>
+      </div>
+
+      <!-- 內容資訊區 -->
+      <div class="p-6 space-y-4 text-stone-700 text-sm max-h-[70vh] overflow-y-auto">
+        <!-- 什麼時候會出現 -->
+        <div>
+          <h4 class="font-bold text-stone-800 flex items-center gap-1.5 text-base mb-1">
+            <span>✨</span> 這種情緒什麼時候會來敲門？
+          </h4>
+          <p id="modal-desc" class="text-stone-600 leading-relaxed bg-stone-50 p-3 rounded-xl border border-stone-200/60"></p>
+        </div>
+
+        <!-- 身體會有什麼感覺 -->
+        <div>
+          <h4 class="font-bold text-stone-800 flex items-center gap-1.5 text-base mb-1">
+            <span>🫀</span> 身體可能會有什麼反應？
+          </h4>
+          <ul id="modal-body-signals" class="list-disc list-inside space-y-1 text-stone-600 bg-rose-50/40 p-3 rounded-xl border border-rose-100">
+          </ul>
+        </div>
+
+        <!-- 情緒在告訴我什麼 -->
+        <div>
+          <h4 class="font-bold text-stone-800 flex items-center gap-1.5 text-base mb-1">
+            <span>💌</span> 這個情緒正在提醒我什麼？
+          </h4>
+          <p id="modal-message" class="text-stone-600 leading-relaxed bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 font-medium"></p>
+        </div>
+
+        <!-- 如何陪伴它 -->
+        <div>
+          <h4 class="font-bold text-stone-800 flex items-center gap-1.5 text-base mb-1">
+            <span>🧸</span> 我們可以怎麼照顧自己？
+          </h4>
+          <p id="modal-action" class="text-stone-600 leading-relaxed bg-sky-50/60 p-3 rounded-xl border border-sky-200/60"></p>
+        </div>
+      </div>
+
+      <!-- 底部按鍵 -->
+      <div class="p-4 bg-stone-50 border-t border-stone-100 flex items-center justify-between">
+        <button onclick="closeModal()" class="px-4 py-2 text-stone-500 hover:text-stone-700 font-bold text-sm">關閉</button>
+        <button id="modal-select-this-btn" onclick="selectThisEmotionAndGo()" 
+          class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md text-sm flex items-center space-x-1.5 transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>我現在正是這個心情！</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast 訊息通知框 (避免使用 alert) -->
+  <div id="toast-box" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-white text-sm font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
+    <i data-lucide="info" class="w-4 h-4 text-rose-400"></i>
+    <span id="toast-text">通知訊息</span>
+  </div>
+
+  <footer class="bg-white border-t border-rose-100 py-6 mt-12">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-400 gap-3">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+        <p>心靈導師情緒教育專欄 · 適合國小、國中與所有想認識自己的朋友</p>
+      </div>
+      <p>每一種情緒都很重要 · 接納自己的感受是愛自己的第一步</p>
+    </div>
+  </footer>
+
+  <script>
+    // 8 款情緒圖卡的核心資料庫 (包含插畫、顏色、能量分類、身體特徵、隱含訊息與照顧對策)
+    const EMOTION_DATA = [
+      {
+        id: 'happy',
+        name: '開心',
+        enName: 'Joyful / Happy',
+        category: 'high-energy',
+        color: 'from-amber-400 to-yellow-300',
+        borderColor: 'border-amber-200',
+        textColor: 'text-amber-700',
+        bgColor: 'bg-amber-50',
+        badgeBg: 'bg-amber-100 text-amber-800',
+        emoji: '😄',
+        summary: '嘴角上揚，心裡熱呼呼、像裝了彈簧一樣輕盈！',
+        trigger: '當完成了想做的事、受到誇獎、吃到好吃的、或跟喜歡的朋友在一起時。',
+        bodySignals: ['心跳輕快，臉頰會自然微笑', '身體覺得很放鬆又有充沛的力氣', '很想跳舞、唱歌或分享好消息給別人'],
+        message: '這件事對你很重要而且讓你很享受！請好好記住這份美好與成就感。',
+        careAction: '大方把快樂分享給家人朋友，也可以把它寫在日記裡，留給以後的自己！',
+        supportCheer: '太棒了！盡情享受這份明亮的心情，你的微笑就像小太陽一樣溫暖！'
+      },
+      {
+        id: 'sad',
+        name: '難過',
+        enName: 'Sad / Hurt',
+        category: 'low-energy',
+        color: 'from-sky-400 to-blue-400',
+        borderColor: 'border-sky-200',
+        textColor: 'text-sky-700',
+        bgColor: 'bg-sky-50',
+        badgeBg: 'bg-sky-100 text-sky-800',
+        emoji: '😢',
+        summary: '胸口沈沈的像下起小雨，眼眶熱熱的，想躲在被窩裡。',
+        trigger: '失去了心愛的東西、考試成績不如預期、或被朋友誤解時。',
+        bodySignals: ['眼眶酸酸的，眼淚忍不住流下來', '喉嚨緊緊的，心口有重重的壓迫感', '身體覺得軟趴趴沒力氣，不想說話'],
+        message: '難過在告訴你：「這件失去的事物對你而言真的很珍貴。」哭泣是身體在幫心靈洗澡排毒喔。',
+        careAction: '找個舒服安全的地方大哭一場，抱抱心愛的玩偶，或是請信任的人給你一個溫暖的擁抱。',
+        supportCheer: '想哭沒有關係，掉眼淚是很勇敢的表現。小雨停了之後，天空一定會出現彩虹的。'
+      },
+      {
+        id: 'angry',
+        name: '生氣',
+        enName: 'Angry / Mad',
+        category: 'high-energy',
+        color: 'from-rose-500 to-red-500',
+        borderColor: 'border-rose-200',
+        textColor: 'text-rose-700',
+        bgColor: 'bg-rose-50',
+        badgeBg: 'bg-rose-100 text-rose-800',
+        emoji: '😡',
+        summary: '像是一座即將噴發的小火山，身體發熱，拳頭握得緊緊的！',
+        trigger: '遇到不公平的事、被冒犯欺負、或辛苦的成果被破壞時。',
+        bodySignals: ['臉頰發燙、呼吸變得急促大聲', '雙手握緊拳頭、牙齒咬得緊緊的', '體內有股想要大吼或推開東西的衝動'],
+        message: '憤怒是你的「心理界線保衛兵」，它在提醒你：「有人跨過了你的界線，你的權益受到侵犯了！」',
+        careAction: '先不要急著說氣話。做3個大大的深呼吸，喝口冷水，或者在紙上用力塗鴉發洩。',
+        supportCheer: '生氣是可以被理解的！你可以生氣，但不要用傷害自己或他人的方式表現。先停一下，深呼吸。'
+      },
+      {
+        id: 'nervous',
+        name: '緊張',
+        enName: 'Nervous / Anxious',
+        category: 'high-energy',
+        color: 'from-violet-500 to-purple-400',
+        borderColor: 'border-violet-200',
+        textColor: 'text-violet-700',
+        bgColor: 'bg-violet-50',
+        badgeBg: 'bg-violet-100 text-violet-800',
+        emoji: '😰',
+        summary: '心臟像小兔子砰砰跳，手心冒汗，肚子感覺怪怪熱熱的。',
+        trigger: '要上台說話報告、剛到陌生新班級、或是等待重要結果公布前。',
+        bodySignals: ['肚子咕嚕咕嚕或有些微痛', '手心出汗、肩膀僵硬聳起來', '腦袋有點空白，很想快點逃跑或結束'],
+        message: '緊張在說：「這件事對我很重要，我很想把它做好！」它正在幫你調動身體資源集中精神。',
+        careAction: '做幾次肚子凸起來的深呼吸，雙手搓一搓，對鏡子裡的自己說：「我已經做好準備了，我可以的！」',
+        supportCheer: '有緊張的感覺，代表你非常在乎。把緊張當成加速推進器，相信平時的自己！'
+      },
+      {
+        id: 'scared',
+        name: '害怕',
+        enName: 'Scared / Fearful',
+        category: 'high-energy',
+        color: 'from-indigo-400 to-purple-500',
+        borderColor: 'border-indigo-200',
+        textColor: 'text-indigo-700',
+        bgColor: 'bg-indigo-50',
+        badgeBg: 'bg-indigo-100 text-indigo-800',
+        emoji: '😨',
+        summary: '寒毛豎起，身體想縮得小小的，眼睛四處張望找安全感。',
+        trigger: '走在太黑的小路、遇到兇猛的大狗、或聽到巨大可怕的雷聲。',
+        bodySignals: ['全身起雞皮疙瘩，四肢發冷', '肌肉緊縮僵硬，呼吸變得非常淺', '很想靠近身邊的大人或找地方躲藏'],
+        message: '害怕是人類祖先留下來最棒的「雷達警報器」，它的任務就是保護你不受傷害，遠離潛在危險！',
+        careAction: '尋求身邊信任的大人保護，開一盞溫暖的燈，抓緊一件有安全感的毛毯。',
+        supportCheer: '害怕並不可恥，感到害怕時尋求幫助是最高明的智慧。現在你很安全，有我們陪著你。'
+      },
+      {
+        id: 'calm',
+        name: '平靜',
+        enName: 'Calm / Peaceful',
+        category: 'calm',
+        color: 'from-emerald-400 to-teal-400',
+        borderColor: 'border-emerald-200',
+        textColor: 'text-emerald-700',
+        bgColor: 'bg-emerald-50',
+        badgeBg: 'bg-emerald-100 text-emerald-800',
+        emoji: '😌',
+        summary: '心湖像一面清澈鏡子沒有波瀾，呼吸順暢，整個人很放鬆。',
+        trigger: '坐在窗邊吹著微風、聽喜歡的輕音樂、靜靜畫畫或閱讀時。',
+        bodySignals: ['肩膀很放鬆自然下垂', '呼吸很深很勻稱，眼神柔和', '沒有急躁想做的事情，很享受現在這一秒'],
+        message: '平靜在提醒你：「身心充電充足，你的內在能量很穩定平衡。」',
+        careAction: '好好記住這種安寧的感覺，深深吸一口氣，將這份放鬆留在你的身體記憶裡。',
+        supportCheer: '平靜就像大自然清晨的微風，能在平靜中沉澱自己，是非常棒的心靈超能力！'
+      },
+      {
+        id: 'surprised',
+        name: '驚訝',
+        enName: 'Surprised / Amazed',
+        category: 'high-energy',
+        color: 'from-orange-400 to-amber-300',
+        borderColor: 'border-orange-200',
+        textColor: 'text-orange-700',
+        bgColor: 'bg-orange-50',
+        badgeBg: 'bg-orange-100 text-orange-800',
+        emoji: '😲',
+        summary: '眼睛張得大大，嘴巴變成「O」型，腦袋瞬間閃過好多問號！',
+        trigger: '突然收到意外的神秘禮物、或看見從未見過的奇特生物。',
+        bodySignals: ['雙眼睜大、眉毛挑高', '倒吸一口氣，短暫定格一兩秒', '注意力百分之百被眼前的事情吸引'],
+        message: '驚訝在告訴你：「注意！世界發生了超出你預期的奇妙事情，快來探索！」',
+        careAction: '眨眨眼，好奇地去觀察探索到底發生了什麼有趣的事情！',
+        supportCheer: '生活充滿了驚奇與未知的探索！帶著你的好奇心，繼續發現生活的大驚喜吧！'
+      },
+      {
+        id: 'excited',
+        name: '期待 / 興奮',
+        enName: 'Excited / Hopeful',
+        category: 'high-energy',
+        color: 'from-pink-500 to-rose-400',
+        borderColor: 'border-pink-200',
+        textColor: 'text-pink-700',
+        bgColor: 'bg-pink-50',
+        badgeBg: 'bg-pink-100 text-pink-800',
+        emoji: '🤩',
+        summary: '眼睛發光，坐立難安，迫不及待想要明天快點到來！',
+        trigger: '明天是期待已久的校外教學、要去遊樂園、或是生日快到了。',
+        bodySignals: ['滿臉笑容，身體很有節奏地擺動', '腦子裡不停想像好玩快樂的畫面', '說話速度不由自主變得很快很活潑'],
+        message: '期待在告訴你：「美好的希望即將發生，你對未來充滿熱情與動力！」',
+        careAction: '把期待的事情化為動力，先把今天的功課準備好，晚上好好睡覺迎接美好日子！',
+        supportCheer: '心中有期待是一件超幸福的事！願每一份美好的等待，都變成最甜美的果實！'
+      }
+    ];
+
+    // 當前選取狀態
+    let activeCategory = 'all';
+    let selectedModalEmotion = null;
+    let selectedExpressEmotions = new Set();
+    let isBreathingActive = false;
+    let breathingInterval = null;
+    let recognition = null;
+    let isRecording = false;
+
+    function renderCards(filter = 'all') {
+      const container = document.getElementById('cards-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const filtered = filter === 'all' 
+        ? EMOTION_DATA 
+        : EMOTION_DATA.filter(item => item.category === filter);
+
+      filtered.forEach(emotion => {
+        const card = document.createElement('div');
+        card.className = `bg-white rounded-2xl p-5 border-2 ${emotion.borderColor} shadow-card hover:shadow-float transition-all duration-200 bounce-hover cursor-pointer flex flex-col justify-between`;
+        card.onclick = () => openEmotionDetail(emotion.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr ${emotion.color} flex items-center justify-center text-3xl shadow-md text-white transform hover:rotate-6 transition">
+                ${emotion.emoji}
+              </div>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${emotion.badgeBg}">
+                ${emotion.name}
+              </span>
+            </div>
+            
+            <h4 class="text-lg font-black text-stone-800 mb-1">${emotion.name} <span class="text-xs font-normal text-stone-400">(${emotion.enName})</span></h4>
+            <p class="text-xs text-stone-600 leading-relaxed mb-4">${emotion.summary}</p>
+          </div>
+
+          <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-bold ${emotion.textColor}">
+            <span>了解更多秘密</span>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // 重新整理圖標
+      lucide.createIcons();
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.className = "category-btn active px-3 py-1 text-xs font-bold rounded-full bg-stone-800 text-white shadow-sm";
+        } else {
+          btn.className = "category-btn px-3 py-1 text-xs font-bold rounded-full bg-white text-stone-600 hover:bg-stone-100 border border-stone-200";
+        }
+      });
+      renderCards(cat);
+    }
+
+    function openEmotionDetail(emotionId) {
+      const emotion = EMOTION_DATA.find(e => e.id === emotionId);
+      if (!emotion) return;
+
+      selectedModalEmotion = emotion;
+
+      // 綁定資料至 Modal
+      document.getElementById('modal-header-bg').className = `p-6 text-white text-center relative bg-gradient-to-r ${emotion.color}`;
+      document.getElementById('modal-avatar').textContent = emotion.emoji;
+      document.getElementById('modal-title').textContent = `${emotion.name} · ${emotion.enName}`;
+      document.getElementById('modal-subtitle').textContent = emotion.summary;
+      
+      document.getElementById('modal-desc').textContent = emotion.trigger;
+      
+      const signalsList = document.getElementById('modal-body-signals');
+      signalsList.innerHTML = '';
+      emotion.bodySignals.forEach(signal => {
+        const li = document.createElement('li');
+        li.textContent = signal;
+        signalsList.appendChild(li);
+      });
+
+      document.getElementById('modal-message').textContent = emotion.message;
+      document.getElementById('modal-action').textContent = emotion.careAction;
+
+      // 打開彈窗
+      const modal = document.getElementById('card-modal');
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('card-modal');
+      modal.classList.add('hidden');
+    }
+
+    // 從 Modal 直接帶入選取並切換到說說心情頁面
+    function selectThisEmotionAndGo() {
+      closeModal();
+      if (selectedModalEmotion) {
+        selectedExpressEmotions.clear();
+        selectedExpressEmotions.add(selectedModalEmotion.id);
+        renderExpressSelectionGrid();
+        switchTab('express');
+        showToast(`已選取「${selectedModalEmotion.name}」，開始寫下你的心情吧！`);
+      }
+    }
+
+    function renderExpressSelectionGrid() {
+      const grid = document.getElementById('express-selection-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      EMOTION_DATA.forEach(emotion => {
+        const isSelected = selectedExpressEmotions.has(emotion.id);
+        const cardBtn = document.createElement('button');
+        cardBtn.type = 'button';
+        cardBtn.onclick = () => toggleEmotionSelection(emotion.id);
+        
+        cardBtn.className = `p-3 rounded-2xl border-2 text-left transition-all flex items-center space-x-2.5 ${
+          isSelected 
+            ? 'border-brand-500 bg-rose-50 shadow-md ring-2 ring-brand-300' 
+            : 'border-stone-200 bg-white hover:border-stone-300'
+        }`;
+
+        cardBtn.innerHTML = `
+          <span class="text-2xl">${emotion.emoji}</span>
+          <div class="overflow-hidden">
+            <span class="font-bold text-sm block truncate ${isSelected ? 'text-brand-600' : 'text-stone-700'}">${emotion.name}</span>
+            <span class="text-[10px] text-stone-400 block truncate">${emotion.enName.split('/')[0]}</span>
+          </div>
+        `;
+        grid.appendChild(cardBtn);
+      });
+    }
+
+    function toggleEmotionSelection(id) {
+      if (selectedExpressEmotions.has(id)) {
+        selectedExpressEmotions.delete(id);
+      } else {
+        if (selectedExpressEmotions.size >= 3) {
+          showToast('最多選取 3 種情緒圖卡喔！');
+          return;
+        }
+        selectedExpressEmotions.add(id);
+      }
+      renderExpressSelectionGrid();
+      
+      const hint = document.getElementById('selection-hint');
+      if (selectedExpressEmotions.size > 0 && hint) {
+        hint.classList.add('hidden');
+      }
+    }
+
+    function updateIntensityDisplay(val) {
+      const num = parseInt(val, 10);
+      document.getElementById('intensity-value-display').textContent = `${num} / 10 級`;
+      const emojiEl = document.getElementById('intensity-emoji');
+      
+      if (num <= 3) {
+        emojiEl.textContent = '🌱';
+      } else if (num <= 7) {
+        emojiEl.textContent = '🌤️';
+      } else {
+        emojiEl.textContent = '🔥';
+      }
+    }
+
+    // 句型模板填入
+    function insertTemplate(type) {
+      const textarea = document.getElementById('mood-text');
+      if (type === 1) {
+        textarea.value = "在學校的時候，我遇到了...讓我覺得很...身體感覺熱熱緊緊的。我希望可以得到同學或老師的理解。";
+      } else if (type === 2) {
+        textarea.value = "今天跟朋友在一起時，因為...讓我心情覺得...我好想跟他說出我心裡真實的想法。";
+      } else if (type === 3) {
+        textarea.value = "我現在覺得腦袋塞了好多事情，有點累累的。我希望先深呼吸5分鐘，好好給自己一個安靜的時間。";
+      }
+      textarea.focus();
+    }
+
+    function toggleSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('此瀏覽器不支援語音辨識，請直接用鍵盤輸入喔！');
+        return;
+      }
+
+      const btnLabel = document.getElementById('speech-btn-label');
+      const speechBtn = document.getElementById('speech-btn');
+
+      if (isRecording) {
+        if (recognition) recognition.stop();
+        isRecording = false;
+        btnLabel.textContent = '語音輸入';
+        speechBtn.classList.remove('bg-rose-100', 'text-brand-600', 'animate-pulse');
+        return;
+      }
+
+      try {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-TW';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          isRecording = true;
+          btnLabel.textContent = '聆聽中...請說話';
+          speechBtn.classList.add('bg-rose-100', 'text-brand-600', 'animate-pulse');
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          const textarea = document.getElementById('mood-text');
+          textarea.value = textarea.value ? `${textarea.value} ${transcript}` : transcript;
+          showToast('語音辨識成功！');
+        };
+
+        recognition.onerror = () => {
+          showToast('語音辨識發生小狀況，請再試一次或手動輸入。');
+          isRecording = false;
+          btnLabel.textContent = '語音輸入';
+          speechBtn.classList.remove('bg-rose-100', 'text-brand-600', 'animate-pulse');
+        };
+
+        recognition.onend = () => {
+          isRecording = false;
+          btnLabel.textContent = '語音輸入';
+          speechBtn.classList.remove('bg-rose-100', 'text-brand-600', 'animate-pulse');
+        };
+
+        recognition.start();
+      } catch (e) {
+        showToast('無法啟動麥克風，請檢查權限設定。');
+      }
+    }
+
+    function generateMoodCard() {
+      if (selectedExpressEmotions.size === 0) {
+        const hint = document.getElementById('selection-hint');
+        if (hint) hint.classList.remove('hidden');
+        showToast('請先選取至少一個情緒圖卡喔！');
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+        return;
+      }
+
+      const intensity = document.getElementById('mood-intensity').value;
+      const text = document.getElementById('mood-text').value.trim() || '我現在正在靜靜體會這份情緒，感受它帶給我的訊息。';
+      
+      // 收集照顧選項
+      const checkedNeeds = [];
+      document.querySelectorAll('input[name="needOption"]:checked').forEach(cb => {
+        checkedNeeds.push(cb.value);
+      });
+
+      // 產生日期
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      document.getElementById('card-date-time').textContent = dateStr;
+
+      // 強度標籤
+      const badge = document.getElementById('card-intensity-badge');
+      badge.textContent = `心情強度：${intensity} / 10 級`;
+      if (intensity >= 8) {
+        badge.className = "text-xs font-bold px-3 py-1 bg-rose-100 text-rose-800 rounded-full";
+      } else if (intensity >= 5) {
+        badge.className = "text-xs font-bold px-3 py-1 bg-amber-100 text-amber-800 rounded-full";
+      } else {
+        badge.className = "text-xs font-bold px-3 py-1 bg-sky-100 text-sky-800 rounded-full";
+      }
+
+      // 情緒標籤渲染
+      const listContainer = document.getElementById('card-emotions-list');
+      listContainer.innerHTML = '';
+      const chosenEmotions = [];
+      selectedExpressEmotions.forEach(id => {
+        const emo = EMOTION_DATA.find(e => e.id === id);
+        if (emo) {
+          chosenEmotions.push(emo);
+          const span = document.createElement('span');
+          span.className = `px-3 py-1 rounded-xl font-black text-sm flex items-center space-x-1.5 shadow-sm ${emo.badgeBg}`;
+          span.innerHTML = `<span>${emo.emoji}</span><span>${emo.name}</span>`;
+          listContainer.appendChild(span);
+        }
+      });
+
+      // 內文渲染
+      document.getElementById('card-narrative-text').textContent = text;
+
+      // 需求標籤渲染
+      const needsWrapper = document.getElementById('card-needs-wrapper');
+      const needsList = document.getElementById('card-needs-list');
+      needsList.innerHTML = '';
+      if (checkedNeeds.length > 0) {
+        needsWrapper.classList.remove('hidden');
+        checkedNeeds.forEach(need => {
+          const nSpan = document.createElement('span');
+          nSpan.className = "px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg border border-stone-200";
+          nSpan.textContent = need;
+          needsList.appendChild(nSpan);
+        });
+      } else {
+        needsWrapper.classList.add('hidden');
+      }
+
+      // 打氣話語
+      const primaryEmotion = chosenEmotions[0];
+      const supportMsg = primaryEmotion ? primaryEmotion.supportCheer : '每一種感受都很有價值，謝謝今天勇敢表達的自己！';
+      document.getElementById('card-support-message').textContent = supportMsg;
+
+      // 顯示結果卡並平滑滾動
+      const resultSection = document.getElementById('result-card-section');
+      resultSection.classList.remove('hidden');
+      lucide.createIcons();
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('🎉 心情卡片生成成功！');
+    }
+
+    // 重設表單
+    function resetForm() {
+      selectedExpressEmotions.clear();
+      renderExpressSelectionGrid();
+      document.getElementById('mood-intensity').value = 5;
+      updateIntensityDisplay(5);
+      document.getElementById('mood-text').value = '';
+      document.querySelectorAll('input[name="needOption"]').forEach(cb => cb.checked = false);
+      document.getElementById('result-card-section').classList.add('hidden');
+      showToast('已重設表單內容');
+    }
+
+    // 朗讀卡片內容 (TTS 語音合成)
+    function readMoodAloud() {
+      if (!('speechSynthesis' in window)) {
+        showToast('您的瀏覽器不支援語音朗讀功能');
+        return;
+      }
+      window.speechSynthesis.cancel(); // 停止先前的朗讀
+      
+      const text = document.getElementById('card-narrative-text').textContent;
+      const cheer = document.getElementById('card-support-message').textContent;
+      const fullText = `這是我今天的心情卡片。我寫下了：${text}。溫暖叮嚀：${cheer}`;
+
+      const utterance = new SpeechSynthesisUtterance(fullText);
+      utterance.lang = 'zh-TW';
+      utterance.rate = 0.95; // 稍微溫柔慢速
+      window.speechSynthesis.speak(utterance);
+      showToast('正在為您朗讀心情卡片...');
+    }
+
+    // 複製文字
+    function copyMoodText() {
+      const text = document.getElementById('printable-mood-card').innerText;
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast('心情文字已複製到剪貼簿！');
+      } catch (err) {
+        showToast('複製失敗，請手動選取複製');
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    function toggleBreathingGuide() {
+      const btn = document.getElementById('breathe-toggle-btn');
+      const outer = document.getElementById('breathe-circle-outer');
+      const mid = document.getElementById('breathe-circle-mid');
+      const core = document.getElementById('breathe-circle-core');
+      const statusText = document.getElementById('breathe-status-text');
+      const timerText = document.getElementById('breathe-timer');
+
+      if (isBreathingActive) {
+        clearInterval(breathingInterval);
+        isBreathingActive = false;
+        btn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>開始呼吸循環</span>`;
+        statusText.textContent = "點擊開始";
+        timerText.textContent = "4秒";
+        core.classList.remove('scale-125');
+        outer.classList.remove('scale-110');
+        mid.classList.remove('scale-110');
+        lucide.createIcons();
+        return;
+      }
+
+      isBreathingActive = true;
+      btn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i><span>暫停放鬆練習</span>`;
+      lucide.createIcons();
+
+      let stage = 0; // 0: 吸氣, 1: 屏息, 2: 吐氣
+      let count = 4;
+
+      function updatePhase() {
+        if (!isBreathingActive) return;
+
+        if (stage === 0) {
+          statusText.textContent = "吸氣...";
+          core.classList.add('scale-125');
+          outer.classList.add('scale-110');
+          mid.classList.add('scale-110');
+        } else if (stage === 1) {
+          statusText.textContent = "輕輕憋住...";
+        } else if (stage === 2) {
+          statusText.textContent = "慢慢吐氣...";
+          core.classList.remove('scale-125');
+          outer.classList.remove('scale-110');
+          mid.classList.remove('scale-110');
+        }
+
+        timerText.textContent = `${count} 秒`;
+
+        count--;
+        if (count < 0) {
+          stage = (stage + 1) % 3;
+          count = 4;
+        }
+      }
+
+      updatePhase();
+      breathingInterval = setInterval(updatePhase, 1000);
+    }
+
+    function switchTab(tabId) {
+      const tabs = ['explore', 'express', 'breathe'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabId) {
+          sec.classList.remove('hidden');
+          if (btn) {
+            btn.className = "px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 bg-white text-brand-600 shadow-sm";
+          }
+        } else {
+          sec.classList.add('hidden');
+          if (btn) {
+            btn.className = "px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center space-x-1.5 text-stone-600 hover:text-brand-600";
+          }
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Toast 提示框
+    function showToast(msg) {
+      const toast = document.getElementById('toast-box');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCards();
+      renderExpressSelectionGrid();
+      lucide.createIcons();
+    });
+  </script>
+
+</body>
+</html>
